@@ -1,1 +1,3 @@
 dump/*
+!dump/NAICS_SAMPLE.txt
+!dump/PRO_ID_SAMPLE.txt
