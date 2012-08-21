@@ -1,12 +1,14 @@
 var fs = require('fs');
 var Biz = require('./model').Biz;
 
-var convertToBoolean = function(bit) {
-  if (typeof bit == 'undefined') return false;
-  if (bit.toUpperCase() == 'Y') {
-    return true;
-  } else {
-    return false;
+var convertToBoolean = function(props, json) {
+  for (var i=0, len = props.length; i<len; i++) {
+    if (typeof json[props[i]] == 'undefined') continue;
+    if (json[props[i]].toUpperCase() == 'Y') {
+      json[props[i]] = true
+    } else {
+      json[props[i]] = false
+    }
   }
 };
 
@@ -14,9 +16,7 @@ exports.parse = function(req, res) {
   txtToJson(__dirname + '/dump/PRO_ID_SAMPLE.TXT', function(json){
     var boolProps = ['Gcc', 'Edi', 'ExportCd', 'Women', 'Veteran', 'Dav', 'Vietnam', 'RgstrtnCCRInd'];
     for (var i=0, leni = json.length; i<leni; i++) {
-      for (var j=0, lenj = boolProps.length; j<lenj; j++) {
-        json[i][boolProps[j]] = convertToBoolean(json[i][boolProps[j]]);
-      }
+      convertToBoolean(boolProps, json[i]);
 
       newBiz = new Biz(json[i]);
       newBiz.save();
@@ -29,9 +29,7 @@ exports.parse = function(req, res) {
   // txtToJson(__dirname + '/dump/NAICS_SAMPLE.TXT', function(json){
   //   var boolProps = ['NAICSPrimInd', 'NAICSGreenInd', 'NAICSSmllBusInd', 'NAICSEmrgSmllBusInd'];
   //   for (var i=0, leni = json.length; i<leni; i++) {
-  //     for (var j=0, lenj = boolProps.length; j<lenj; j++) {
-  //       json[i][boolProps[j]] = convertToBoolean(json[i][boolProps[j]]);
-  //     }
+  //     convertToBoolean(boolProps, json[i]);
 
   //     naic = json[i];
 
