@@ -9,7 +9,6 @@
     "express": "3.0.0rc3",
     "jade": "*",
     "stylus": "*",
-    "line-reader": "~0.2.2",
     "mongoose": "~3.0.2"
   }
 }
