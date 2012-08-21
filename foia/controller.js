@@ -11,14 +11,16 @@ var convertToBoolean = function(bit) {
 };
 
 exports.parse = function(req, res) {
-  console.log("calling parse");
-  txtToJson(__dirname + '/dump/PRO_ID.TXT', function(json){
-    console.log("Back with the json");
-    var boolProps = ['Gcc'];
+  txtToJson(__dirname + '/dump/PRO_ID_SAMPLE.TXT', function(json){
+    var boolProps = ['Gcc', 'Edi', 'ExportCd', 'Women', 'Veteran', 'Dav', 'Vietnam', 'RgstrtnCCRInd'];
     for (var i=0, leni = json.length; i<leni; i++) {
       for (var j=0, lenj = boolProps.length; j<lenj; j++) {
         json[i][boolProps[j]] = convertToBoolean(json[i][boolProps[j]]);
       }
+
+      newBiz = new Biz(json[i]);
+      newBiz.save();
+      console.log(json[i]);
     }
     res.send(json.length + " records loaded");
   });
@@ -41,7 +43,6 @@ var txtToJson = function(filepath, cb) {
       }
       retJson.push(doc);
     }
-    console.log("calling the cb");
     cb(retJson);
   });
 };
