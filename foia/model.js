@@ -34,7 +34,17 @@ var bizSchema = new mongoose.Schema({
   Vietnam: {type: Boolean, default: false},
   RgstrtnCCRInd: {type: Boolean, default: false},
   BusLastUpdtDt: Date,
-  latlon: Array
+  latlon: Array,
+
+  naics: [{
+    NAICSCd: Number,
+    NAICSYrNmb: Number,
+    NAICSPrimInd: {type: Boolean, default: false},
+    NAICSGreenInd: {type: Boolean, default: false},
+    NAICSSmllBusInd: {type: Boolean, default: false},
+    NAICSEmrgSmllBusInd: {type: Boolean, default: false}
+  }]
+
 });
 
 //bizSchema.index({'latlon':'2d'});

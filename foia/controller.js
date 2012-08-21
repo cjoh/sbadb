@@ -20,10 +20,36 @@ exports.parse = function(req, res) {
 
       newBiz = new Biz(json[i]);
       newBiz.save();
-      console.log(json[i]);
+      // console.log(json[i]);
     }
     res.send(json.length + " records loaded");
   });
+
+  // // Jed: what is wrong with this?
+  // txtToJson(__dirname + '/dump/NAICS_SAMPLE.TXT', function(json){
+  //   var boolProps = ['NAICSPrimInd', 'NAICSGreenInd', 'NAICSSmllBusInd', 'NAICSEmrgSmllBusInd'];
+  //   for (var i=0, leni = json.length; i<leni; i++) {
+  //     for (var j=0, lenj = boolProps.length; j<lenj; j++) {
+  //       json[i][boolProps[j]] = convertToBoolean(json[i][boolProps[j]]);
+  //     }
+
+  //     naic = json[i];
+
+  //     biz = Biz.findOne({'User_Id': json[i]['User_Id']}, function(err, biz) {
+  //       if (err) return handleError(err);
+  //       if (biz == null) return console.log('not found');
+
+  //       delete naic['User_Id'];
+  //       biz.naics.push(naic);
+
+  //       console.log(naic);
+
+  //       biz.save();
+  //     });
+  //   }
+  //   res.send(json.length + " records loaded");
+  // });
+
 };
 
 var txtToJson = function(filepath, cb) {
