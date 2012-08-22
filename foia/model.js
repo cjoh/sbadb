@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var request = require('superagent');
 
 var bizSchema = new mongoose.Schema({
   User_Id: String,
@@ -48,6 +49,26 @@ var bizSchema = new mongoose.Schema({
   //naics: Array
 });
 
-//bizSchema.index({'latlon':'2d'});
+bizSchema.index({'latlon':'2d'});
+
+bizSchema.pre('save', true, function (next, done) {
+  var biz = this;
+
+  request.get('http://50.17.218.115/street2coordinates/' + this.Address + ' '
+               + this.City + ', ' + this.State + ' ' + this.Zip)
+  .end(function(res){
+    if (res.ok) {
+      var json = JSON.parse(res.text);
+      var results = json[Object.keys(json)[0]];
+      biz.latlon = [results['longitude'], results['latitude']];
+      console.log('Geocoded!');
+    } else {
+      console.log('Oh no! error!');
+    }
+    done();
+  });
+
+ next();
+});
 
 exports.Biz = DB.model('Biz', bizSchema);
