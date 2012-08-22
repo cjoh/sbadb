@@ -85,7 +85,7 @@ var txtToJson = function(filepath, cb) {
       var vals = rows[i].split('\t');
       var doc = {};
       for (var j=0; j<numkeys; j++){
-        doc[keys[j]] = (typeof vals[j] == 'undefined' || vals[j] === '') ? '' : vals[j].replace(/^\s+|\s+$/g,"");
+        doc[keys[j].toLowerCase()] = (typeof vals[j] == 'undefined' || vals[j] === '') ? '' : vals[j].replace(/^\s+|\s+$/g,"");
       }
       retJson.push(doc);
     }
