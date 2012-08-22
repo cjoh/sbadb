@@ -1,5 +1,5 @@
 var fs = require('fs');
-var Biz = require('./model').Biz;
+var Biz = require('../model').Biz;
 
 var convertToBoolean = function(props, json) {
   for (var i=0, len = props.length; i<len; i++) {
@@ -60,9 +60,9 @@ var recursiveNaics = function(naics, cb) {
 };
 
 exports.parse = function(req, res) {
-  txtToJson(__dirname + '/dump/PRO_ID_SAMPLE.TXT', function(bizs){
+  txtToJson(__dirname + '/../dump/PRO_ID_SAMPLE.TXT', function(bizs){
     recursivePro(bizs, function(){
-      txtToJson(__dirname + '/dump/NAICS_SAMPLE.TXT', function(naics){
+      txtToJson(__dirname + '/../dump/NAICS_SAMPLE.TXT', function(naics){
         recursiveNaics(naics, function(){
           res.send("Records all loaded!");
         });
