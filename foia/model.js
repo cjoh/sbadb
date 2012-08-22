@@ -54,8 +54,8 @@ bizSchema.index({'latlon':'2d'});
 bizSchema.pre('save', true, function (next, done) {
   var biz = this;
 
-  request.get('http://50.17.218.115/street2coordinates/' + this.Address + ' '
-               + this.City + ', ' + this.State + ' ' + this.Zip)
+  request.get('http://50.17.218.115/street2coordinates/' + this.address + ' '
+               + this.city + ', ' + this.state + ' ' + this.zip)
   .end(function(res){
     if (res.ok) {
       var json = JSON.parse(res.text);
