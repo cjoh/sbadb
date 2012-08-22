@@ -36,21 +36,18 @@ var bizSchema = new mongoose.Schema({
   BusLastUpdtDt: Date,
   latlon: Array,
 
-  naics: [{
+  naics: [ new mongoose.Schema({
     NAICSCd: Number,
     NAICSYrNmb: Number,
     NAICSPrimInd: {type: Boolean, default: false},
     NAICSGreenInd: {type: Boolean, default: false},
     NAICSSmllBusInd: {type: Boolean, default: false},
     NAICSEmrgSmllBusInd: {type: Boolean, default: false}
-  }]
-
+  })]
+  //alt simpler NAICS
+  //naics: Array
 });
 
 //bizSchema.index({'latlon':'2d'});
-
-bizSchema.statics.createFromDump = function(row) {
-
-};
 
 exports.Biz = DB.model('Biz', bizSchema);

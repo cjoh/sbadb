@@ -12,41 +12,63 @@ var convertToBoolean = function(props, json) {
   }
 };
 
-exports.parse = function(req, res) {
-  txtToJson(__dirname + '/dump/PRO_ID_SAMPLE.TXT', function(json){
+var recursivePro = function(bizs, cb) {
+  if (bizs.length > 0) {
     var boolProps = ['Gcc', 'Edi', 'ExportCd', 'Women', 'Veteran', 'Dav', 'Vietnam', 'RgstrtnCCRInd'];
-    for (var i=0, leni = json.length; i<leni; i++) {
-      convertToBoolean(boolProps, json[i]);
+    var row = bizs.shift();
+    convertToBoolean(boolProps, row);
+    newBiz = new Biz(row);
+    newBiz.save(function(err) {
+      if (!err) {
+        recursivePro(bizs, cb);
+      } else {
+        console.log("Error saving newBiz: " + err);
+      }
+    });
+  } else {
+    cb();
+  }
+};
 
-      newBiz = new Biz(json[i]);
-      newBiz.save();
-      // console.log(json[i]);
-    }
-    res.send(json.length + " records loaded");
+var recursiveNaics = function(naics, cb) {
+  if (naics.length > 0) {
+    var boolProps = ['NAICSPrimInd', 'NAICSGreenInd', 'NAICSSmllBusInd', 'NAICSEmrgSmllBusInd'];
+    var naic = naics.shift();
+    convertToBoolean(boolProps, naic);
+
+    Biz.findOne({User_Id: naic.User_Id}, function(err, biz) {
+      if (err) console.log("ERR FINDING BIZ");
+      else if (biz === null) {
+        console.log("NO BIZ MATCHES FOR " + naic.User_Id + ". Moving on...");
+        recursiveNaics(naics, cb);
+      } else {
+        delete naic['User_Id'];
+        biz.naics.push(naic);
+        biz.save(function(err) {
+          if (!err) {
+            recursiveNaics(naics, cb);
+          } else {
+            console.log("Error saving naics biz: " + err);
+          }
+        });
+      }
+    });
+
+  } else {
+    cb();
+  }
+};
+
+exports.parse = function(req, res) {
+  txtToJson(__dirname + '/dump/PRO_ID_SAMPLE.TXT', function(bizs){
+    recursivePro(bizs, function(){
+      txtToJson(__dirname + '/dump/NAICS_SAMPLE.TXT', function(naics){
+        recursiveNaics(naics, function(){
+          res.send("Records all loaded!");
+        });
+      });
+    });
   });
-
-  // // Jed: what is wrong with this?
-  // txtToJson(__dirname + '/dump/NAICS_SAMPLE.TXT', function(json){
-  //   var boolProps = ['NAICSPrimInd', 'NAICSGreenInd', 'NAICSSmllBusInd', 'NAICSEmrgSmllBusInd'];
-  //   for (var i=0, leni = json.length; i<leni; i++) {
-  //     convertToBoolean(boolProps, json[i]);
-
-  //     naic = json[i];
-
-  //     biz = Biz.findOne({'User_Id': json[i]['User_Id']}, function(err, biz) {
-  //       if (err) return handleError(err);
-  //       if (biz == null) return console.log('not found');
-
-  //       delete naic['User_Id'];
-  //       biz.naics.push(naic);
-
-  //       console.log(naic);
-
-  //       biz.save();
-  //     });
-  //   }
-  //   res.send(json.length + " records loaded");
-  // });
 
 };
 
