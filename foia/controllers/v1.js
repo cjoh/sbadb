@@ -30,6 +30,7 @@ exports.index = function(req, res) {
 
     Biz.count(searchParams, function(err, count){
       response.meta.count = count;
+      response.meta.total_pages = Math.ceil(count / per_page);
       res.send(response);
     });
 
