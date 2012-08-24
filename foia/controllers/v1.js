@@ -10,7 +10,7 @@ exports.index = function(req, res) {
   // and case-insensitive values.
   for (key in req.query) {
     if (key.toLowerCase() == 'page'){
-      page = req.query[key];
+      page = parseInt(req.query[key]);
       continue;
     }
     searchParams[key.toLowerCase()] = new RegExp(req.query[key], 'i');
