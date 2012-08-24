@@ -4,16 +4,25 @@ var Biz = require('../model').Biz;
 exports.index = function(req, res) {
 
   var searchParams = {}
-    , page = 1;
+    , page = 1
+    , skipKeys = {page: true, near: true, radius: true};
 
   // Construct new searchParams object, using lowercase keys
   // and case-insensitive values.
   for (key in req.query) {
     if (key.toLowerCase() == 'page'){
       page = parseInt(req.query[key]);
-      continue;
+    } else if (key.toLowerCase() == 'near') {
+      var maxDistance = typeof req.query['radius'] === 'undefined' ? 1 : parseFloat(req.query['radius']);
+      var latlng = req.query[key].split(',');
+      searchParams["latlon"] = {$near: [parseFloat(latlng[0]), parseFloat(latlng[1])], $maxDistance: maxDistance};
     }
-    searchParams[key.toLowerCase()] = new RegExp(req.query[key], 'i');
+
+    if (key in skipKeys) {
+      continue;
+    } else {
+      searchParams[key.toLowerCase()] = new RegExp(req.query[key], 'i');
+    }
   }
 
   // Query the database and return the results as JSON.
@@ -22,6 +31,7 @@ exports.index = function(req, res) {
       query = Biz.find(searchParams).skip(skip).limit(per_page);
 
   query.exec(function (err, results) {
+
     if (err) return handleError(err);
 
     var response = {};
