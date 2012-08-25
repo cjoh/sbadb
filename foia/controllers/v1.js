@@ -25,7 +25,10 @@ exports.index = function(req, res) {
     var lcKey = key.toLowerCase()
       , val = req.query[key];
 
-    if (lcKey == 'page'){
+    if (val == "") {
+      searchParams[lcKey] = "";
+
+    } else if (lcKey == 'page'){
       page = parseInt(val);
 
     } else if (lcKey == 'near') {
@@ -41,8 +44,11 @@ exports.index = function(req, res) {
     } else if (booleanProps.indexOf(lcKey) !== -1) {
       searchParams[lcKey] = convertToBoolean(val);
 
-    } else if (!isNaN(parseInt(val))) {
+    } else if (!isNaN(val)) {
       searchParams[lcKey] = val;
+
+    } else if (val.match(/([0-9]+,?)/)) {
+      searchParams[lcKey] = {$in: val.split(',')};
     } else {
       searchParams[lcKey] = {$regex: val, $options: "-i"};
     }
