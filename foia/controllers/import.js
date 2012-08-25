@@ -13,82 +13,70 @@ var convertToBoolean = function(props, json) {
   }
 };
 
-var recursivePro = function(bizs, cb) {
-  if (bizs.length > 0) {
-    var row = bizs.shift();
-    convertToBoolean(bizBooleans, row);
-    newBiz = new Biz(row);
-    newBiz.save(function(err) {
-      if (!err) {
-        recursivePro(bizs, cb);
-      } else {
-        console.log("Error saving newBiz: " + err);
-      }
-    });
-  } else {
-    cb();
-  }
-};
-
-var recursiveNaics = function(naics, cb) {
-  if (naics.length > 0) {
-    var boolProps = ['NAICSPrimInd', 'NAICSGreenInd', 'NAICSSmllBusInd', 'NAICSEmrgSmllBusInd'];
-    var naic = naics.shift();
-    convertToBoolean(boolProps, naic);
-
-    Biz.findOne({User_Id: naic.User_Id}, function(err, biz) {
-      if (err) console.log("ERR FINDING BIZ");
-      else if (biz === null) {
-        console.log("NO BIZ MATCHES FOR " + naic.User_Id + ". Moving on...");
-        recursiveNaics(naics, cb);
-      } else {
-        delete naic['User_Id'];
-        biz.naics.push(naic);
-        biz.save(function(err) {
-          if (!err) {
-            recursiveNaics(naics, cb);
-          } else {
-            console.log("Error saving naics biz: " + err);
-          }
-        });
-      }
-    });
-
-  } else {
-    cb();
-  }
-};
-
 exports.parse = function(req, res) {
-  txtToJson(__dirname + '/../dump/PRO_ID_SAMPLE.TXT', function(bizs){
-    recursivePro(bizs, function(){
-      txtToJson(__dirname + '/../dump/NAICS_SAMPLE.TXT', function(naics){
-        recursiveNaics(naics, function(){
-          res.send("Records all loaded!");
-        });
+  importFromTxt(__dirname + '/../dump/PRO_ID.TXT', function(doc, cb){
+    // save function
+    convertToBoolean(bizBooleans, doc);
+    newBiz = new Biz(doc);
+    newBiz.save(function(err) {
+      if (err) return console.log("Error saving newBiz: " + err);
+      return cb();
+    });
+
+  }, function(){
+
+    importFromTxt(__dirname + '/../dump/NAICS.TXT', function(doc, cb){
+
+      convertToBoolean(['NAICSPrimInd', 'NAICSGreenInd', 'NAICSSmllBusInd', 'NAICSEmrgSmllBusInd'], doc);
+
+      Biz.findOne({User_Id: doc.User_Id}, function(err, biz) {
+        if (err) {
+          console.log("ERR FINDING BIZ");
+        } else if (biz === null) {
+          return console.log("NO BIZ MATCHES FOR " + doc.User_Id + ". Moving on...");
+        } else {
+          delete doc['User_Id'];
+          biz.naics.push(doc);
+          biz.save(function(err) {
+            if (err) return console.log("Error saving newBiz: " + err);
+            console.log('naic saved');
+            return cb();
+          });
+        }
       });
+
+    }, function(){
+      res.send('fin');
     });
   });
 
 };
 
-var txtToJson = function(filepath, cb) {
+var importFromTxt = function(filepath, saveFn, cb) {
   fs.readFile(filepath, 'ascii', function (err,data) {
-    if (err) {
-      return console.log("ERROR! -- \n" + err);
-    }
+    if (err) return console.log("ERROR! -- \n" + err);
+
     var rows = data.split("\n");
-    var keys = rows.shift().split('\t');
+    var keys = rows[0].split('\t');
     var numkeys = keys.length;
-    var retJson = [];
-    for (var i=0, len = rows.length; i<len; i++) {
-      var vals = rows[i].split('\t');
+
+    var parseLine = function (rows) {
+      var firstRow = rows.shift();
+      if (rows.length === 0) return cb();
+      var vals = firstRow.split('\t');
       var doc = {};
+
       for (var j=0; j<numkeys; j++){
         doc[keys[j].toLowerCase()] = (typeof vals[j] == 'undefined' || vals[j] === '') ? '' : vals[j].replace(/^\s+|\s+$/g,"");
       }
-      retJson.push(doc);
+
+      saveFn(doc, function(){
+        console.log(rows.length + ' bizs remaining');
+        parseLine(rows);
+      });
     }
-    cb(retJson);
+
+    rows.shift();
+    parseLine(rows);
   });
 };

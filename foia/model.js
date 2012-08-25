@@ -5,6 +5,11 @@ var bizBooleans = exports.bizBooleans = ['gcc', 'edi', 'exportcd', 'women', 'vet
                                              'naics.naicsprimind', 'naics.naicsgreenind', 'naics.naicssmllbusind',
                                              'naics.naicsemrgsmllbusind'];
 
+var geocodeCacheSchema = new mongoose.Schema({
+  address: String,
+  latlon: Array
+});
+
 var bizSchema = new mongoose.Schema({
   user_id: String,
   name: String,
@@ -55,24 +60,48 @@ var bizSchema = new mongoose.Schema({
 
 bizSchema.index({'latlon':'2d'});
 
-bizSchema.pre('save', true, function (next, done) {
+bizSchema.pre('save', function (next) {
   var biz = this;
 
-  request.get('http://50.17.218.115/street2coordinates/' + this.address + ' '
-               + this.city + ', ' + this.state + ' ' + this.zip)
-  .end(function(res){
-    if (res.ok) {
-      var json = JSON.parse(res.text);
-      var results = json[Object.keys(json)[0]];
-      biz.latlon = [results['longitude'], results['latitude']];
-      console.log('Geocoded!');
-    } else {
-      console.log('Oh no! error!');
-    }
-    done();
-  });
+  if (biz.latlon.length === 0){
+    var full_address = this.address + ' ' + this.city + ', ' + this.state + ' ' + this.zip;
 
- next();
+    cachedGeocodes = GeocodeCache.findOne({address: full_address}, function(err, result) {
+      if (err || result === null) {
+        request.get('http://50.17.218.115/street2coordinates/' + full_address)
+        .end(function(res){
+          if (res.ok) {
+            var json = JSON.parse(res.text);
+            var results = json[Object.keys(json)[0]];
+            if (results == null) {
+              console.log("Couldn't geocode the following:");
+              console.log(json);
+              next();
+            } else {
+              biz.latlon = [results['longitude'], results['latitude']];
+              var newCache = new GeocodeCache({address: full_address, latlon: biz.latlon});
+              newCache.save();
+              console.log('Geocoded! ' + results['longitude'] + ', ' + results['latitude']);
+            }
+          } else {
+            console.log('Oh no! error!');
+          }
+          next();
+        });
+      } else {
+        biz.latlon = result.latlon;
+        console.log('geocoded from cache');
+        next();
+      }
+    });
+
+
+
+  } else {
+    next();
+  }
+
 });
 
 exports.Biz = DB.model('Biz', bizSchema);
+exports.GeocodeCache = GeocodeCache = DB.model('GeocodeCache', geocodeCacheSchema);
