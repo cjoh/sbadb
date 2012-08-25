@@ -48,7 +48,11 @@ exports.index = function(req, res) {
       searchParams[lcKey] = val;
 
     } else if (val.match(/([0-9]+,?)/)) {
-      searchParams[lcKey] = {$in: val.split(',')};
+      if (val.match(/{all}/i)) {
+        searchParams[lcKey] = {$all: val.replace(/{all}/i, '').split(',')};
+      } else {
+        searchParams[lcKey] = {$in: val.split(',')};
+      }
     } else {
       searchParams[lcKey] = {$regex: val, $options: "-i"};
     }
