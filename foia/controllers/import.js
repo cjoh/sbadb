@@ -1,5 +1,6 @@
 var fs = require('fs');
 var Biz = require('../model').Biz;
+var bizBooleans = require('../model').bizBooleans;
 
 var convertToBoolean = function(props, json) {
   for (var i=0, len = props.length; i<len; i++) {
@@ -14,9 +15,8 @@ var convertToBoolean = function(props, json) {
 
 var recursivePro = function(bizs, cb) {
   if (bizs.length > 0) {
-    var boolProps = ['Gcc', 'Edi', 'ExportCd', 'Women', 'Veteran', 'Dav', 'Vietnam', 'RgstrtnCCRInd'];
     var row = bizs.shift();
-    convertToBoolean(boolProps, row);
+    convertToBoolean(bizBooleans, row);
     newBiz = new Biz(row);
     newBiz.save(function(err) {
       if (!err) {

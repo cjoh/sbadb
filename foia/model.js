@@ -1,6 +1,10 @@
 var mongoose = require('mongoose');
 var request = require('superagent');
 
+var bizBooleans = exports.bizBooleans = ['gcc', 'edi', 'exportcd', 'women', 'veteran', 'dav', 'vietnam', 'rgstrtnccrind',
+                                             'naics.naicsprimind', 'naics.naicsgreenind', 'naics.naicssmllbusind',
+                                             'naics.naicsemrgsmllbusind'];
+
 var bizSchema = new mongoose.Schema({
   user_id: String,
   name: String,
