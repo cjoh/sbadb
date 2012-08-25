@@ -13,7 +13,7 @@ var convertToBoolean = function(props, json) {
 };
 
 exports.parse = function(req, res) {
-  importFromTxt(__dirname + '/../dump/PRO_ID.TXT', function(doc, cb){
+  importFromTxt(__dirname + '/../dump/PRO_ID_SAMPLE.TXT', function(doc, cb){
     // save function
     convertToBoolean(['gcc', 'edi', 'exportcd', 'women', 'veteran', 'dav', 'vietnam', 'rgstrtnccrind'], doc);
     newBiz = new Biz(doc);
@@ -24,21 +24,23 @@ exports.parse = function(req, res) {
 
   }, function(){
 
-    importFromTxt(__dirname + '/../dump/NAICS.TXT', function(doc, cb){
+    importFromTxt(__dirname + '/../dump/NAICS_SAMPLE.TXT', function(doc, cb){
 
-      convertToBoolean(['NAICSPrimInd', 'NAICSGreenInd', 'NAICSSmllBusInd', 'NAICSEmrgSmllBusInd'], doc);
+      convertToBoolean(['naicsprimind', 'naicsgreenind', 'naicssmllbusind', 'naicsemrgsmllbusind'], doc);
 
-      Biz.findOne({User_Id: doc.User_Id}, function(err, biz) {
+      Biz.findOne({user_id: doc.user_id}, function(err, biz) {
         if (err) {
           console.log("ERR FINDING BIZ");
+          return cb();
         } else if (biz === null) {
-          return console.log("NO BIZ MATCHES FOR " + doc.User_Id + ". Moving on...");
+          console.log("NO BIZ MATCHES FOR " + doc.user_id + ". Moving on...");
+          return cb();
         } else {
-          delete doc['User_Id'];
+          delete doc['user_id'];
           biz.naics.push(doc);
           biz.save(function(err) {
             if (err) return console.log("Error saving newBiz: " + err);
-            console.log('naic saved');
+            console.log('naic saved user: ' + biz.user_id + ' naiccd: ' + doc.naicscd);
             return cb();
           });
         }
@@ -70,7 +72,7 @@ var importFromTxt = function(filepath, saveFn, cb) {
       }
 
       saveFn(doc, function(){
-        console.log(rows.length + ' bizs remaining');
+        console.log(rows.length + ' rows remaining');
         parseLine(rows);
       });
     }
