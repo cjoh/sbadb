@@ -5,8 +5,7 @@ var bizBooleans = require('../model').bizBooleans;
 exports.index = function(req, res) {
 
   var searchParams = {}
-    , page = 1
-    , skipKeys = ['page', 'near', 'radius'];
+    , page = 1;
 
   var convertToBoolean = function (str) {
     if (str.toLowerCase() === "true" ||
