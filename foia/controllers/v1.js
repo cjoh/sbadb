@@ -21,22 +21,27 @@ exports.index = function(req, res) {
   // Construct new searchParams object, using lowercase keys
   // and case-insensitive values.
   for (key in req.query) {
-    if (key.toLowerCase() == 'page'){
-      page = parseInt(req.query[key]);
-    } else if (key.toLowerCase() == 'near') {
-      // divide by 69 to convert miles to degrees
-      var maxDistance = (typeof req.query['radius'] === 'undefined' ? 5 : parseFloat(req.query['radius'])) / 69;
-      var latlng = req.query[key].split(',');
-      searchParams["latlon"] = {$near: [parseFloat(latlng[0]), parseFloat(latlng[1])], $maxDistance: maxDistance};
-    } else if (bizBooleans.indexOf(key.toLowerCase()) !== -1) {
-      searchParams[key.toLowerCase()] = convertToBoolean(req.query[key]);
-      continue;
-    }
+    var lcKey = key.toLowerCase()
+      , val = req.query[key];
 
-    if (skipKeys.indexOf(key) !== -1) {
-      continue;
+    if (lcKey == 'page'){
+      page = parseInt(val);
+
+    } else if (lcKey == 'near') {
+      // divide by 69 to convert miles to degrees
+      // default to 5 miles
+      var maxDistance = (typeof req.query['radius'] === 'undefined' ? 5 : parseFloat(req.query['radius'])) / 69;
+      var latlng = val.split(',');
+      searchParams["latlon"] = {$near: [parseFloat(latlng[0]), parseFloat(latlng[1])], $maxDistance: maxDistance};
+
+    } else if (lcKey == 'radius') {
+      // see above
+
+    } else if (bizBooleans.indexOf(lcKey) !== -1) {
+      searchParams[lcKey] = convertToBoolean(val);
+
     } else {
-      searchParams[key.toLowerCase()] = new RegExp(req.query[key], 'i');
+      searchParams[lcKey] = new RegExp(val, 'i');
     }
   }
 
