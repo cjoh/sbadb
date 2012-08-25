@@ -1,6 +1,8 @@
 var fs = require('fs');
 var Biz = require('../model').Biz;
-var bizBooleans = require('../model').bizBooleans;
+
+var booleanProps = ['gcc', 'edi', 'exportcd', 'women', 'veteran', 'dav', 'vietnam', 'rgstrtnccrind',
+                    'naics.naicsprimind', 'naics.naicsgreenind', 'naics.naicssmllbusind', 'naics.naicsemrgsmllbusind'];
 
 exports.index = function(req, res) {
 
@@ -36,11 +38,13 @@ exports.index = function(req, res) {
     } else if (lcKey == 'radius') {
       // see above
 
-    } else if (bizBooleans.indexOf(lcKey) !== -1) {
+    } else if (booleanProps.indexOf(lcKey) !== -1) {
       searchParams[lcKey] = convertToBoolean(val);
 
+    } else if (!isNaN(parseInt(val))) {
+      searchParams[lcKey] = val;
     } else {
-      searchParams[lcKey] = new RegExp(val, 'i');
+      searchParams[lcKey] = {$regex: val, $options: "-i"};
     }
   }
 
@@ -51,7 +55,7 @@ exports.index = function(req, res) {
 
   query.exec(function (err, results) {
 
-    if (err) return handleError(err);
+    if (err) return console.log(err);
 
     var response = {};
     response.results = results;

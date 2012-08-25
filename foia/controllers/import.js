@@ -1,6 +1,5 @@
 var fs = require('fs');
 var Biz = require('../model').Biz;
-var bizBooleans = require('../model').bizBooleans;
 
 var convertToBoolean = function(props, json) {
   for (var i=0, len = props.length; i<len; i++) {
@@ -16,7 +15,7 @@ var convertToBoolean = function(props, json) {
 exports.parse = function(req, res) {
   importFromTxt(__dirname + '/../dump/PRO_ID.TXT', function(doc, cb){
     // save function
-    convertToBoolean(bizBooleans, doc);
+    convertToBoolean(['gcc', 'edi', 'exportcd', 'women', 'veteran', 'dav', 'vietnam', 'rgstrtnccrind'], doc);
     newBiz = new Biz(doc);
     newBiz.save(function(err) {
       if (err) return console.log("Error saving newBiz: " + err);
