@@ -23,7 +23,14 @@ exports.index = function(req, res) {
   // and case-insensitive values.
   for (key in req.query) {
     var lcKey = key.toLowerCase()
-      , val = req.query[key];
+      , val = req.query[key]
+      , matches
+      , option;
+
+    if (matches = val.match(/{([a-z]+)}/i)) {
+      option = matches[1].toLowerCase();
+      val = val.replace(/{([a-z]+)}/i, '');
+    }
 
     if (val == "") {
       searchParams[lcKey] = "";
@@ -45,11 +52,19 @@ exports.index = function(req, res) {
       searchParams[lcKey] = convertToBoolean(val);
 
     } else if (!isNaN(val)) {
-      searchParams[lcKey] = val;
+      if (option === "gt" ||
+          option === "gte" ||
+          option === "lt" ||
+          option === "lte") {
+        searchParams[lcKey] = {};
+        searchParams[lcKey]["$" + option] = val;
+      } else {
+        searchParams[lcKey] = val;
+      }
 
     } else if (val.match(/([0-9]+,?)/)) {
-      if (val.match(/{all}/i)) {
-        searchParams[lcKey] = {$all: val.replace(/{all}/i, '').split(',')};
+      if (option === "all") {
+        searchParams[lcKey] = {$all: val.split(',')};
       } else {
         searchParams[lcKey] = {$in: val.split(',')};
       }
@@ -62,6 +77,8 @@ exports.index = function(req, res) {
   var per_page = 20,
       skip = (page - 1) * per_page,
       query = Biz.find(searchParams).skip(skip).limit(per_page);
+
+      console.log(searchParams)
 
   query.exec(function (err, results) {
 
