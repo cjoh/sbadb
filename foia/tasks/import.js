@@ -1,5 +1,9 @@
-var fs = require('fs');
+var fs = require('fs')
+var mongoose = require('mongoose');
+global.DB = mongoose.createConnection('localhost', 'dsbs');
 var Biz = require('../model').Biz;
+
+
 
 var convertToBoolean = function(props, json) {
   for (var i=0, len = props.length; i<len; i++) {
@@ -12,8 +16,8 @@ var convertToBoolean = function(props, json) {
   }
 };
 
-exports.parse = function(req, res) {
-  importFromTxt(__dirname + '/../dump/PRO_ID_SAMPLE.TXT', function(doc, cb){
+var parse = function() {
+  importFromTxt(__dirname + '/../dump/PRO_ID.TXT', function(doc, cb){
     // save function
     convertToBoolean(['gcc', 'edi', 'exportcd', 'women', 'veteran', 'dav', 'vietnam', 'rgstrtnccrind'], doc);
     newBiz = new Biz(doc);
@@ -24,7 +28,7 @@ exports.parse = function(req, res) {
 
   }, function(){
 
-    importFromTxt(__dirname + '/../dump/NAICS_SAMPLE.TXT', function(doc, cb){
+    importFromTxt(__dirname + '/../dump/NAICS.TXT', function(doc, cb){
 
       convertToBoolean(['naicsprimind', 'naicsgreenind', 'naicssmllbusind', 'naicsemrgsmllbusind'], doc);
 
@@ -47,7 +51,8 @@ exports.parse = function(req, res) {
       });
 
     }, function(){
-      res.send('fin');
+      console.log("Fin.");
+      process.exit();
     });
   });
 
@@ -81,3 +86,5 @@ var importFromTxt = function(filepath, saveFn, cb) {
     parseLine(rows);
   });
 };
+
+parse();
