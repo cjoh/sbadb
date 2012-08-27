@@ -74,7 +74,7 @@ exports.index = function(req, res) {
   }
 
   // Query the database and return the results as JSON.
-  var per_page = 20,
+  var per_page = 100,
       skip = (page - 1) * per_page,
       query = Biz.find(searchParams).skip(skip).limit(per_page);
 
