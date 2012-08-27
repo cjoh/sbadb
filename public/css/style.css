@@ -1,0 +1,19 @@
+body {
+  padding: 10px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+a {
+  color: #00b7ff;
+}
+label {
+  width: 130px;
+  display: inline-block;
+}
+input[type=text] {
+  width: 200px;
+}
+#map {
+  height: 400px;
+  width: 600px;
+  margin: 20px;
+}
