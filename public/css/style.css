@@ -16,4 +16,14 @@ input[type=text] {
   height: 400px;
   width: 600px;
   margin: 20px;
+  margin-left: 500px;
+}
+form {
+  float: left;
+  width: 450px;
+  padding: 10px;
+  background-color: #ccc;
+}
+#results-list {
+  clear: both;
 }

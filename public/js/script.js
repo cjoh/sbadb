@@ -25,6 +25,15 @@ var findBizs = function() {
     url += $("input[name=naicscd]").val();
   }
 
+  var booleans = ['rgstrtnccrind', 'vietnam', 'dav', 'veteran', 'women', 'exportcd', 'edi', 'gcc'];
+
+  $(booleans).each(function(_, val){
+    if($("select[name=" + val + "]").val() != "" &&
+       $("select[name=" + val + "]").val() != "(no preference)" ) {
+      url += "&" + val + "=" + $("select[name=" + val + "]").val();
+    }
+  })
+
   console.log(url)
 
   $.ajax({
