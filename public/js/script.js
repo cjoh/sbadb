@@ -1,5 +1,8 @@
+(function(){
+
 var map = L.map('map').setView([40,-100], 4),
     markers = new Array();
+
 L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
 var clearMarkers = function() {
@@ -8,9 +11,12 @@ var clearMarkers = function() {
   })
 }
 
-var findBizs = function(lat, lng, radius) {
+var findBizs = function() {
 
-  var url = "/v1/bizs?near=" + lng + "," + lat  + '&radius=' + radius;
+  var miles = (map.getBounds()._northEast.lng - map.getBounds()._southWest.lng) * 69,
+      center = map.getCenter();
+
+  var url = "/v1/bizs?near=" + center.lng + "," + center.lat  + '&radius=' + miles;
 
   if ($("input[name=naicscd]").val() != "") {
     console.log('adding')
@@ -19,8 +25,8 @@ var findBizs = function(lat, lng, radius) {
     url += $("input[name=naicscd]").val();
   }
 
-
   console.log(url)
+
   $.ajax({
     url: url,
     type: 'GET',
@@ -35,13 +41,8 @@ var findBizs = function(lat, lng, radius) {
         var popupContent = "Name: " + biz.name + "<br /><br />Naics codes: ",
             codes = "";
 
-        $(biz.naics).each(function(){
-          codes += this.naicscd + ", ";
-        })
-
-        if (codes) {
-          popupContent += codes.slice(0, -2);
-        }
+        $(biz.naics).each(function(){ codes += this.naicscd + ", "; })
+        if (codes)popupContent += codes.slice(0, -2);
 
         marker.bindPopup(popupContent);
         markers.push(marker);
@@ -51,35 +52,29 @@ var findBizs = function(lat, lng, radius) {
 
 }
 
-map.on('viewreset', function(){
+map.on('viewreset, dragend, zoomend', function(){
   var miles = (map.getBounds()._northEast.lng - map.getBounds()._southWest.lng) * 69,
       center = map.getCenter();
   findBizs(center.lat, center.lng, miles);
-})
+});
 
-$(function(){
+$(document).on("submit", "form", function(e){
+  e.preventDefault();
 
-  $("form").submit(function(e){
-    e.preventDefault();
+  var address = $("input[name=address]").val();
+  if (address === "") return findBizs();
 
-    var address = $("input[name=address]").val();
-    if (address === "") {
-      var miles = (map.getBounds()._northEast.lng - map.getBounds()._southWest.lng) * 69;
-      map.setView([40, -100], 4);
-      return findBizs(40, -100, miles);
-    }
-
-    $.getJSON('http://50.17.218.115/street2coordinates/'+address+'?callback=?', function(json){
-      var results = json[Object.keys(json)[0]];
-      if (results === null) {
-        return alert("Couldn't find address.");
-      }
-
-      map.setView([results.latitude, results.longitude], 10);
-      var miles = (map.getBounds()._northEast.lng - map.getBounds()._southWest.lng) * 69;
-      findBizs(results.latitude, results.longitude, miles);
-    });
+  $.getJSON('http://50.17.218.115/street2coordinates/'+address+'?callback=?', function(json){
+    var results = json[Object.keys(json)[0]];
+    if (results === null) return alert("Couldn't find address.");
+    map.setView([results.latitude, results.longitude], 10);
   });
 
-  map.fire('viewreset')
-})
+});
+
+
+$(function(){
+  $("form").submit();
+});
+
+}).call(this);
