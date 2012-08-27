@@ -27,7 +27,7 @@ var findBizs = function(lat, lng, radius) {
     dataType: 'json',
     success: function(data) {
       clearMarkers();
-      $("#results-count").html(data.results.length + ' matches');
+      $("#results-count").html(data.meta.count + ' matches');
       for(var i = 0, len = data.results.length; i < len; i++) {
         var biz = data.results[i];
         var marker = L.marker([biz.latlon[1], biz.latlon[0]]).addTo(map);
