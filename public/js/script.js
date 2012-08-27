@@ -11,6 +11,10 @@ var clearMarkers = function() {
   })
 }
 
+var clearResults = function() {
+  $("ul#results").html('');
+}
+
 var findBizs = function() {
 
   var miles = (map.getBounds()._northEast.lng - map.getBounds()._southWest.lng) * 69,
@@ -42,6 +46,7 @@ var findBizs = function() {
     dataType: 'json',
     success: function(data) {
       clearMarkers();
+      clearResults();
       $("#results-count").html(data.meta.count + ' matches');
       for(var i = 0, len = data.results.length; i < len; i++) {
         var biz = data.results[i];
@@ -54,6 +59,9 @@ var findBizs = function() {
         if (codes)popupContent += codes.slice(0, -2);
 
         marker.bindPopup(popupContent);
+
+        $("ul#results").append('<li data-id="' + biz.user_id + '"><pre>' + JSON.stringify(biz, undefined, 2) + '</pre></li>')
+
         markers.push(marker);
       }
     }

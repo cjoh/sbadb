@@ -27,3 +27,11 @@ form {
 #results-list {
   clear: both;
 }
+#results-list ul#results {
+  padding: 0;
+}
+#results-list ul#results li {
+  list-style: none;
+  border-bottom: 1px solid #ccc;
+  padding: 10px;
+}
