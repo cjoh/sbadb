@@ -12,7 +12,8 @@ var findBizs = function(lat, lng, radius) {
 
   var url = "/v1/bizs?near=" + lng + "," + lat  + '&radius=' + radius;
 
-  if ($("input[name=naicscd]").val()) {
+  if ($("input[name=naicscd]").val() != "") {
+    console.log('adding')
     url += "&naics.naicscd=";
     if ($("select[name=naics-all]").val() == "true") url += "{all}";
     url += $("input[name=naicscd]").val();
@@ -75,6 +76,8 @@ $(function(){
       }
 
       map.setView([results.latitude, results.longitude], 10);
+      var miles = (map.getBounds()._northEast.lng - map.getBounds()._southWest.lng) * 69;
+      findBizs(results.latitude, results.longitude, miles);
     });
   });
 
