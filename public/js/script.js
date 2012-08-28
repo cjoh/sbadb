@@ -22,8 +22,7 @@ var findBizs = function() {
 
   var url = "/v1/bizs?near=" + center.lng + "," + center.lat  + '&radius=' + miles;
 
-  if ($("input[name=naicscd]").val() != "") {
-    console.log('adding')
+  if ($("input[name=naicscd]").val() !== "") {
     url += "&naics.naicscd=";
     if ($("select[name=naics-all]").val() == "true") url += "{all}";
     url += $("input[name=naicscd]").val();
@@ -32,13 +31,12 @@ var findBizs = function() {
   var booleans = ['rgstrtnccrind', 'vietnam', 'dav', 'veteran', 'women', 'exportcd', 'edi', 'gcc'];
 
   $(booleans).each(function(_, val){
-    if($("select[name=" + val + "]").val() != "" &&
-       $("select[name=" + val + "]").val() != "(no preference)" ) {
-      url += "&" + val + "=" + $("select[name=" + val + "]").val();
+    console.log($("input[name=" + val + "]"));
+    console.log($("input[name=" + val + "]").is(':checked'));
+    if($("input[name=" + val + "]").is(":checked")) {
+      url += "&" + val + "=true";
     }
-  })
-
-  console.log(url)
+  });
 
   $.ajax({
     url: url,
@@ -60,7 +58,7 @@ var findBizs = function() {
 
         marker.bindPopup(popupContent);
 
-        $("ul#results").append('<li data-id="' + biz.user_id + '"><pre>' + JSON.stringify(biz, undefined, 2) + '</pre></li>')
+        $("ul#results").append('<li data-id="' + biz.user_id + '"><pre>' + JSON.stringify(biz, undefined, 2) + '</pre></li>');
 
         markers.push(marker);
       }

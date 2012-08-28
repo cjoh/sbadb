@@ -19,10 +19,22 @@ input[type=text] {
   margin-left: 500px;
 }
 form {
+  height: 380px;
   float: left;
   width: 450px;
   padding: 10px;
-  background-color: #ccc;
+  background-color: #efefef;
+}
+fieldset.requirements {
+  border: none;
+  margin: none;
+  padding: none;
+}
+fieldset.requirements div {
+  margin-top: 6px;
+}
+fieldset.requirements label {
+  width: 100%;
 }
 #results-list {
   clear: both;
