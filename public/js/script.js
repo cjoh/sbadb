@@ -31,8 +31,6 @@ var findBizs = function() {
   var booleans = ['rgstrtnccrind', 'vietnam', 'dav', 'veteran', 'women', 'exportcd', 'edi', 'gcc'];
 
   $(booleans).each(function(_, val){
-    console.log($("input[name=" + val + "]"));
-    console.log($("input[name=" + val + "]").is(':checked'));
     if($("input[name=" + val + "]").is(":checked")) {
       url += "&" + val + "=true";
     }
