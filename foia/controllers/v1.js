@@ -27,7 +27,6 @@ exports.index = function(req, res) {
   var parseSchemaForKey = function (schema, keyPrefix, lcKey, val, option) {
 
     var addSearchParam = function (param) {
-      console.log(param)
       for (key in param) {
         searchParams[keyPrefix + key] = param[key];
       }
@@ -49,7 +48,7 @@ exports.index = function(req, res) {
 
     } else if (schema.paths[lcKey].constructor.name === "SchemaString") {
 
-      if (val.match(/([0-9]+,?)/)) {
+      if (val.match(/([0-9]+,?)/) && val.match(',')) {
         if (option === "all") {
           param[lcKey] = {$all: val.split(',')};
         } else {
@@ -72,7 +71,7 @@ exports.index = function(req, res) {
 
     } else if (schema.paths[lcKey].constructor.name === "SchemaNumber") {
 
-      if (val.match(/([0-9]+,?)/)) {
+      if (val.match(/([0-9]+,?)/) && val.match(',')) {
         if (option === "all") {
           param[lcKey] = {$all: val.split(',')};
         } else {
@@ -98,8 +97,12 @@ exports.index = function(req, res) {
   // Construct searchParams
   for (key in req.query) {
     var lcKey = key.toLowerCase()
-      , val = req.query[key]
+      , val = req.query[key].replace(/{(.*)}/, '')
       , option;
+
+    if (matches = req.query[key].match(/{(.*)}/)){
+      option = matches[1];
+    }
 
     if (lcKey === "page") {
       page = parseInt(val);
