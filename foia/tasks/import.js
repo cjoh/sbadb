@@ -22,7 +22,7 @@ var parse = function() {
     convertToBoolean(['gcc', 'edi', 'exportcd', 'women', 'veteran', 'dav', 'vietnam', 'rgstrtnccrind'], doc);
     newBiz = new Biz(doc);
     newBiz.save(function(err) {
-      if (err) return console.log("Error saving newBiz: " + err);
+      if (err) console.log("Error saving newBiz: " + err);
       return cb();
     });
 
@@ -43,7 +43,7 @@ var parse = function() {
           delete doc['user_id'];
           biz.naics.push(doc);
           biz.save(function(err) {
-            if (err) return console.log("Error saving newBiz: " + err);
+            if (err) console.log("Error saving newBiz: " + err);
             console.log('naic saved user: ' + biz.user_id + ' naiccd: ' + doc.naicscd);
             return cb();
           });
