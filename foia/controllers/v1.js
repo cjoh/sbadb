@@ -1,98 +1,41 @@
 var fs = require('fs');
 var Biz = require('../model').Biz;
+var mongooseApiQuery = require('../../mongoose-api-query');
 
 var booleanProps = ['gcc', 'edi', 'exportcd', 'women', 'veteran', 'dav', 'vietnam', 'rgstrtnccrind',
                     'naics.naicsprimind', 'naics.naicsgreenind', 'naics.naicssmllbusind', 'naics.naicsemrgsmllbusind'];
 
 exports.index = function(req, res) {
 
-  var searchParams = {}
-    , page = 1;
-
-  var convertToBoolean = function (str) {
-    if (str.toLowerCase() === "true" ||
-        str.toLowerCase() === "t" ||
-        str === "1"){
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  // Construct new searchParams object, using lowercase keys
-  // and case-insensitive values.
-  for (key in req.query) {
-    var lcKey = key.toLowerCase()
-      , val = req.query[key]
-      , matches
-      , option;
-
-    if (matches = val.match(/{([a-z]+)}/i)) {
-      option = matches[1].toLowerCase();
-      val = val.replace(/{([a-z]+)}/i, '');
-    }
-
-    if (val == "") {
-      searchParams[lcKey] = "";
-
-    } else if (lcKey == 'page'){
-      page = parseInt(val);
-
-    } else if (lcKey == 'near') {
-      // divide by 69 to convert miles to degrees
-      // default to 5 miles
-      var maxDistance = (typeof req.query['radius'] === 'undefined' ? 5 : parseFloat(req.query['radius'])) / 69;
-      var latlng = val.split(',');
-      searchParams["latlon"] = {$near: [parseFloat(latlng[0]), parseFloat(latlng[1])], $maxDistance: maxDistance};
-
-    } else if (lcKey == 'radius') {
-      // see above
-
-    } else if (booleanProps.indexOf(lcKey) !== -1) {
-      searchParams[lcKey] = convertToBoolean(val);
-
-    } else if (!isNaN(val)) {
-      if (option === "gt" ||
-          option === "gte" ||
-          option === "lt" ||
-          option === "lte") {
-        searchParams[lcKey] = {};
-        searchParams[lcKey]["$" + option] = val;
-      } else {
-        searchParams[lcKey] = val;
+  mongooseApiQuery(req, {
+    custom_params: function(key, val, searchParams) {
+      if (key === "near") {
+        // divide by 69 to convert miles to degrees
+        // default to 5 miles
+        var maxDistance = (typeof req.query['radius'] === 'undefined' ? 5 : parseFloat(req.query['radius'])) / 69;
+        var latlng = val.split(',');
+        searchParams["latlon"] = {$near: [parseFloat(latlng[0]), parseFloat(latlng[1])], $maxDistance: maxDistance};
+        return true;
       }
+    },
+    model: Biz,
+    per_page: 100
+  }, function(query, attributes){
 
-    } else if (val.match(/([0-9]+,?)/)) {
-      if (option === "all") {
-        searchParams[lcKey] = {$all: val.split(',')};
-      } else {
-        searchParams[lcKey] = {$in: val.split(',')};
-      }
-    } else {
-      searchParams[lcKey] = {$regex: val, $options: "-i"};
-    }
-  }
+    query.exec(function (err, results) {
+      if (err) return console.log(err);
 
-  // Query the database and return the results as JSON.
-  var per_page = 100,
-      skip = (page - 1) * per_page,
-      query = Biz.find(searchParams).skip(skip).limit(per_page);
+      var response = {};
+      response.results = results;
+      response.meta = {page: attributes.page, per_page: attributes.per_page }
 
-      console.log(searchParams)
+      Biz.count(attributes.searchParams, function(err, count){
+        response.meta.count = count;
+        response.meta.total_pages = Math.ceil(count / attributes.per_page);
+        res.send(response);
+      });
 
-  query.exec(function (err, results) {
-
-    if (err) return console.log(err);
-
-    var response = {};
-    response.results = results;
-    response.meta = {page: page, per_page: per_page }
-
-    Biz.count(searchParams, function(err, count){
-      response.meta.count = count;
-      response.meta.total_pages = Math.ceil(count / per_page);
-      res.send(response);
     });
-
   });
+
 };
