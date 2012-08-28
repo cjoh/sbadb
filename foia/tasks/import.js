@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 global.DB = mongoose.createConnection('localhost', 'dsbs');
 var Biz = require('../model').Biz;
 
-Biz.remove({});
+Biz.collection.remove({});
 
 var convertToBoolean = function(props, json) {
   for (var i=0, len = props.length; i<len; i++) {
