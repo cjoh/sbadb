@@ -39,8 +39,8 @@
           type: 'GET'
         },
         results_el: $("#mapsearch-results"),
-        results_template: function(result) {
-          return "        <div>" + result[settings.result_params.id] + "</div>        ";
+        results_template: function(key, result) {
+          return "        <div># " + key + ": " + result['name'] + "</div>        ";
         },
         pagination_el: $("#mapsearch-pagination"),
         pagination_template: function(pagination) {
@@ -91,21 +91,23 @@
         });
       };
       processResults = function(results) {
-        var marker, result, _i, _j, _len, _len1, _results;
+        var marker, _i, _len;
         settings.results_el.html('');
         for (_i = 0, _len = markers.length; _i < _len; _i++) {
           marker = markers[_i];
           map.removeLayer(marker);
         }
-        $(results).each(function(key, result) {
-          return markers.push(L.marker(settings.result_params.latlng(result)).addTo(map));
+        return $(results).each(function(key, result) {
+          var new_marker;
+          key = key + 1;
+          new_marker = L.marker(settings.result_params.latlng(result), {
+            icon: new L.NumberedDivIcon({
+              number: key
+            })
+          });
+          markers.push(new_marker.addTo(map));
+          return settings.results_el.append(settings.results_template(key, result));
         });
-        _results = [];
-        for (_j = 0, _len1 = results.length; _j < _len1; _j++) {
-          result = results[_j];
-          _results.push(settings.results_el.append(settings.results_template(result)));
-        }
-        return _results;
       };
       processPagination = function(data) {
         var page_params;

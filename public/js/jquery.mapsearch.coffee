@@ -22,9 +22,9 @@ $.fn.extend
         url: ''
         type: 'GET'
       results_el: $("#mapsearch-results")
-      results_template: (result) ->
+      results_template: (key, result) ->
         "
-        <div>#{result[settings.result_params.id]}</div>
+        <div># #{key}: #{result['name']}</div>
         "
       pagination_el: $("#mapsearch-pagination")
       pagination_template: (pagination) ->
@@ -83,10 +83,13 @@ $.fn.extend
       map.removeLayer(marker) for marker in markers
 
       $(results).each (key, result) ->
-        markers.push L.marker(settings.result_params.latlng(result)).addTo(map)
+        key = key + 1
+        new_marker = L.marker settings.result_params.latlng(result),
+          icon: new L.NumberedDivIcon
+            number: key
+        markers.push new_marker.addTo(map)
 
-      for result in results
-        settings.results_el.append(settings.results_template(result))
+        settings.results_el.append(settings.results_template(key, result))
 
 
     processPagination = (data) ->
