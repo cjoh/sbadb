@@ -9,12 +9,10 @@ exports.index = function(req, res) {
 
   mongooseApiQuery(req.query, {
     custom_params: function(key, val, searchParams) {
-      if (key === "near") {
-        // divide by 69 to convert miles to degrees
-        // default to 5 miles
-        var maxDistance = (typeof req.query['radius'] === 'undefined' ? 5 : parseFloat(req.query['radius'])) / 69;
-        var latlng = val.split(',');
-        searchParams["latlon"] = {$near: [parseFloat(latlng[0]), parseFloat(latlng[1])], $maxDistance: maxDistance};
+      if (key === "ne_lat") {
+        var box = [[parseFloat(req.query['sw_lng']), parseFloat(req.query['sw_lat'])], [parseFloat(req.query['ne_lng']),  parseFloat(req.query['ne_lat'])]];
+        console.log(box)
+        searchParams["latlon"] = {$within: {$box: box}};
         return true;
       }
     },
@@ -22,7 +20,7 @@ exports.index = function(req, res) {
     per_page: 10
   }, function(query, attributes){
 
-    query.exec(function (err, results) {
+    query.sort('name').exec(function (err, results) {
       if (err) return console.log(err);
 
       var response = {};
