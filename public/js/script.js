@@ -1,14 +1,9 @@
 $(function(){
   $("#mapsearch-map").mapSearch({
-    json_selector: 'results',
-    ajax: {
-      url: '/v1/bizs'
-    },
-    result_params: {
-      id: 'user_id',
-      latlng: function(result){
-        return [result.latlon[1], result.latlon[0]]
-      }
+    request_url: '/v1/bizs',
+    response_params_id: 'user_id',
+    response_params_latlng: function(result){
+      return [result.latlon[1], result.latlon[0]]
     }
   });
 
