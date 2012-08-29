@@ -24,7 +24,7 @@ $.fn.extend
       results_el: $("#mapsearch-results")
       results_template: (result) ->
         "
-        <div>#{result.user_id}</div>
+        <div>#{result[settings.result_params.id]}</div>
         "
       pagination_el: $("#mapsearch-pagination")
       pagination_template: (pagination) ->
