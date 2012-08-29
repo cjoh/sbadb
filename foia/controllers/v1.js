@@ -1,13 +1,13 @@
 var fs = require('fs');
 var Biz = require('../model').Biz;
-var mongooseApiQuery = require('../../mongoose-api-query');
+var mongooseApiQuery = require('mongoose-api-query');
 
 var booleanProps = ['gcc', 'edi', 'exportcd', 'women', 'veteran', 'dav', 'vietnam', 'rgstrtnccrind',
                     'naics.naicsprimind', 'naics.naicsgreenind', 'naics.naicssmllbusind', 'naics.naicsemrgsmllbusind'];
 
 exports.index = function(req, res) {
 
-  mongooseApiQuery(req, {
+  mongooseApiQuery(req.query, {
     custom_params: function(key, val, searchParams) {
       if (key === "near") {
         // divide by 69 to convert miles to degrees
