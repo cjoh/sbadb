@@ -1,6 +1,6 @@
 $(function(){
   $("#mapsearch-map").mapSearch({
-    request_url: '/v1/bizs',
+    request_uri: '/v1/bizs',
     response_params_id: 'user_id',
     response_params_latlng: function(result){
       return [result.latlon[1], result.latlon[0]]
