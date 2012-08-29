@@ -8,8 +8,11 @@ $.fn.extend
       initial_coordinates: [40, -100]
       initial_zoom: 4
       tile_layer: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-      per_page: 10
-      geo_params: ['ne_lat', 'ne_lng', 'sw_lat', 'sw_lng']
+      geo_params:
+        ne_lat: (map) -> map.getBounds().getNorthEast().lat
+        ne_lng: (map) -> map.getBounds().getNorthEast().lng
+        sw_lat: (map) -> map.getBounds().getSouthWest().lat
+        sw_lng: (map) -> map.getBounds().getSouthWest().lng
       json_selector: ''
       result_params:
         id: 'id'
@@ -22,14 +25,24 @@ $.fn.extend
     settings = $.extend settings, options
 
     map = L.map(el[0]).setView(settings.initial_coordinates, settings.initial_zoom)
-    L.tileLayer(settings.tile_layer).addTo(map);
+    L.tileLayer(settings.tile_layer).addTo(map)
+    markers = []
 
-    console.log('initialized with settings:')
-    console.log(settings)
+    current_params = {}
 
-    makeAjaxRequest = () ->
+    # ====================================================
+    # Make the call to your API
+    # ----------------------------------------------------
+    makeAjaxRequest = (new_params) ->
+      request_params = new_params || current_params
+
+      for key, func of settings.geo_params
+        request_params[key] = func(map)
+
+      console.log settings.ajax.url + "?" + $.param(request_params)
+
       $.ajax
-        url: settings.ajax.url
+        url: settings.ajax.url + "?" + $.param(request_params)
         type: settings.ajax.method
         success: (data) ->
           if settings.json_selector
@@ -37,12 +50,27 @@ $.fn.extend
           else
             processResults(data)
 
+    # ====================================================
+    # Process the returned json
+    # ----------------------------------------------------
     processResults = (results) ->
-      $(results).each (key, result) ->
-        L.marker(settings.result_params.latlng(result)).addTo(map);
+      map.removeLayer(marker) for marker in markers
 
+      $(results).each (key, result) ->
+        markers.push L.marker(settings.result_params.latlng(result)).addTo(map)
+
+    # ====================================================
+    # Attach event handlers
+    # ----------------------------------------------------
     map.on 'dragend zoomend', () ->
       makeAjaxRequest()
 
-    arguments.callee.checkSettings = () =>
-      console.log(settings)
+    set_view = arguments.callee.set_view = (latlng, zoom) ->
+      map.setView(latlng, zoom)
+      update();
+
+    update = arguments.callee.update = (new_params) =>
+      makeAjaxRequest(new_params)
+
+    change_page = arguments.callee.change_page = (page) =>
+      makeAjaxRequest($.extend current_params, {page: page})

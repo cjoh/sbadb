@@ -6,15 +6,27 @@
 
   $.fn.extend({
     mapSearch: function(options) {
-      var el, makeAjaxRequest, map, processResults, settings,
+      var change_page, current_params, el, makeAjaxRequest, map, markers, processResults, set_view, settings, update,
         _this = this;
       el = this;
       settings = {
         initial_coordinates: [40, -100],
         initial_zoom: 4,
         tile_layer: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        per_page: 10,
-        geo_params: ['ne_lat', 'ne_lng', 'sw_lat', 'sw_lng'],
+        geo_params: {
+          ne_lat: function(map) {
+            return map.getBounds().getNorthEast().lat;
+          },
+          ne_lng: function(map) {
+            return map.getBounds().getNorthEast().lng;
+          },
+          sw_lat: function(map) {
+            return map.getBounds().getSouthWest().lat;
+          },
+          sw_lng: function(map) {
+            return map.getBounds().getSouthWest().lng;
+          }
+        },
         json_selector: '',
         result_params: {
           id: 'id',
@@ -30,11 +42,19 @@
       settings = $.extend(settings, options);
       map = L.map(el[0]).setView(settings.initial_coordinates, settings.initial_zoom);
       L.tileLayer(settings.tile_layer).addTo(map);
-      console.log('initialized with settings:');
-      console.log(settings);
-      makeAjaxRequest = function() {
+      markers = [];
+      current_params = {};
+      makeAjaxRequest = function(new_params) {
+        var func, key, request_params, _ref;
+        request_params = new_params || current_params;
+        _ref = settings.geo_params;
+        for (key in _ref) {
+          func = _ref[key];
+          request_params[key] = func(map);
+        }
+        console.log(settings.ajax.url + "?" + $.param(request_params));
         return $.ajax({
-          url: settings.ajax.url,
+          url: settings.ajax.url + "?" + $.param(request_params),
           type: settings.ajax.method,
           success: function(data) {
             if (settings.json_selector) {
@@ -46,15 +66,29 @@
         });
       };
       processResults = function(results) {
+        var marker, _i, _len;
+        for (_i = 0, _len = markers.length; _i < _len; _i++) {
+          marker = markers[_i];
+          map.removeLayer(marker);
+        }
         return $(results).each(function(key, result) {
-          return L.marker(settings.result_params.latlng(result)).addTo(map);
+          return markers.push(L.marker(settings.result_params.latlng(result)).addTo(map));
         });
       };
       map.on('dragend zoomend', function() {
         return makeAjaxRequest();
       });
-      return arguments.callee.checkSettings = function() {
-        return console.log(settings);
+      set_view = arguments.callee.set_view = function(latlng, zoom) {
+        map.setView(latlng, zoom);
+        return update();
+      };
+      update = arguments.callee.update = function(new_params) {
+        return makeAjaxRequest(new_params);
+      };
+      return change_page = arguments.callee.change_page = function(page) {
+        return makeAjaxRequest($.extend(current_params, {
+          page: page
+        }));
       };
     }
   });

@@ -1,5 +1,4 @@
-(function(){
-
+$(function(){
   $("#map").mapSearch({
     json_selector: 'results',
     ajax: {
@@ -10,8 +9,33 @@
       latlng: function(result){
         return [result.latlon[1], result.latlon[0]]
       }
+    },
+    geo_params: {
+      near: function(map) {
+        return map.getCenter().lng + ',' + map.getCenter().lat
+      },
+      radius: function(map) {
+        return (map.getBounds()._northEast.lng - map.getBounds()._southWest.lng) * 69
+      }
     }
   });
+
+  $("#map").mapSearch.update();
+});
+
+$(document).on("submit", "form", function(e){
+  e.preventDefault();
+
+  var address = $("input[name=address]").val();
+  if (address === "") return findBizs();
+
+  $.getJSON('http://50.17.218.115/street2coordinates/'+address+'?callback=?', function(json){
+    var results = json[Object.keys(json)[0]];
+    if (results === null) return alert("Couldn't find address.");
+    $("#map").mapSearch.set_view([results.latitude, results.longitude], 10);
+  });
+
+});
 
 /*
 var map = L.map('map').setView([40,-100], 4),
@@ -85,23 +109,11 @@ map.on('viewreset, dragend, zoomend', function(){
   findBizs(center.lat, center.lng, miles);
 });
 
-$(document).on("submit", "form", function(e){
-  e.preventDefault();
 
-  var address = $("input[name=address]").val();
-  if (address === "") return findBizs();
-
-  $.getJSON('http://50.17.218.115/street2coordinates/'+address+'?callback=?', function(json){
-    var results = json[Object.keys(json)[0]];
-    if (results === null) return alert("Couldn't find address.");
-    map.setView([results.latitude, results.longitude], 10);
-  });
-
-});
 
 
 $(function(){
   $("form").submit();
-});*/
+});
 
-}).call(this);
+}).call(this);*/
