@@ -1,5 +1,5 @@
 $(function(){
-  $("#map").mapSearch({
+  $("#mapsearch-map").mapSearch({
     json_selector: 'results',
     ajax: {
       url: '/v1/bizs'
@@ -20,20 +20,32 @@ $(function(){
     }
   });
 
-  $("#map").mapSearch.update();
+  $("#mapsearch-map").mapSearch.update();
 });
 
 $(document).on("submit", "form", function(e){
   e.preventDefault();
 
   var address = $("input[name=address]").val();
-  if (address === "") return findBizs();
+  var params = {};
+  var booleans = ['rgstrtnccrind', 'vietnam', 'dav', 'veteran', 'women', 'exportcd', 'edi', 'gcc'];
 
-  $.getJSON('http://50.17.218.115/street2coordinates/'+address+'?callback=?', function(json){
-    var results = json[Object.keys(json)[0]];
-    if (results === null) return alert("Couldn't find address.");
-    $("#map").mapSearch.set_view([results.latitude, results.longitude], 10);
+  $(booleans).each(function(_, val){
+    if($("input[name=" + val + "]").is(":checked")) {
+      params[val] = "true";
+    }
   });
+
+  if (address && address !== "") {
+    $.getJSON('http://50.17.218.115/street2coordinates/'+address+'?callback=?', function(json){
+      var results = json[Object.keys(json)[0]];
+      if (results === null) return alert("Couldn't find address.");
+      $("#map").mapSearch.set_view([results.latitude, results.longitude], 10, false);
+      $("#map").mapSearch.update(params);
+    });
+  } else {
+    $("#mapsearch-map").mapSearch.update(params);
+  }
 
 });
 
