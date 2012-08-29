@@ -106,7 +106,7 @@ $.fn.extend
     # Attach event handlers
     # ----------------------------------------------------
     map.on 'dragend zoomend', () ->
-      makeAjaxRequest()
+      change_page(1); # also makes request
 
     $(document).on "click", "[data-mapsearch-role=previous-page]", () -> previous_page();
     $(document).on "click", "[data-mapsearch-role=next-page]", () -> next_page();

@@ -40,7 +40,7 @@
         },
         results_el: $("#mapsearch-results"),
         results_template: function(result) {
-          return "        <div>" + result.user_id + "</div>        ";
+          return "        <div>" + result[settings.result_params.id] + "</div>        ";
         },
         pagination_el: $("#mapsearch-pagination"),
         pagination_template: function(pagination) {
@@ -120,7 +120,7 @@
         return pagination_status = page_params;
       };
       map.on('dragend zoomend', function() {
-        return makeAjaxRequest();
+        return change_page(1);
       });
       $(document).on("click", "[data-mapsearch-role=previous-page]", function() {
         return previous_page();
