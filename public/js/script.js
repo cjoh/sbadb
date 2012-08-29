@@ -1,5 +1,19 @@
 (function(){
 
+  $("#map").mapSearch({
+    json_selector: 'results',
+    ajax: {
+      url: '/v1/bizs'
+    },
+    result_params: {
+      id: 'user_id',
+      latlng: function(result){
+        return [result.latlon[1], result.latlon[0]]
+      }
+    }
+  });
+
+/*
 var map = L.map('map').setView([40,-100], 4),
     markers = new Array();
 
@@ -88,6 +102,6 @@ $(document).on("submit", "form", function(e){
 
 $(function(){
   $("form").submit();
-});
+});*/
 
 }).call(this);
