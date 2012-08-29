@@ -6,14 +6,13 @@
 
   $.fn.extend({
     mapSearch: function(options) {
-      var current_params, el, exports, makeAjaxRequest, map, markers, pagination_status, processPagination, processResults, settings,
+      var current_params, exports, makeAjaxRequest, map, markers, pagination_status, processPagination, processResults, settings,
         _this = this;
-      el = this;
       settings = {
         initial_coordinates: [40, -100],
         initial_zoom: 4,
         tile_layer: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        request_url: '',
+        request_uri: '',
         request_geo_params: {
           ne_lat: function(map) {
             return map.getBounds().getNorthEast().lat;
@@ -28,8 +27,7 @@
             return map.getBounds().getSouthWest().lng;
           }
         },
-        response_json_selector: 'results',
-        response_params_id: 'id',
+        response_json_key: 'results',
         response_params_latlng: function(result) {
           return [result.latitude, result.longitude];
         },
@@ -60,7 +58,7 @@
       current_params = {};
       pagination_status = {};
       markers = [];
-      map = L.map(el[0]).setView(settings.initial_coordinates, settings.initial_zoom);
+      map = L.map(this[0]).setView(settings.initial_coordinates, settings.initial_zoom);
       L.tileLayer(settings.tile_layer).addTo(map);
       makeAjaxRequest = function(new_params) {
         var func, key, request_params, _ref;
@@ -72,11 +70,11 @@
         }
         current_params = request_params;
         return $.ajax({
-          url: settings.request_url + "?" + $.param(request_params),
+          url: settings.request_uri + "?" + $.param(request_params),
           type: 'GET',
           success: function(data) {
-            if (settings.response_json_selector) {
-              processResults(data[settings.response_json_selector]);
+            if (settings.response_json_key) {
+              processResults(data[settings.response_json_key]);
             } else {
               processResults(data);
             }
