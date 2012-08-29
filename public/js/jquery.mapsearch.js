@@ -6,7 +6,7 @@
 
   $.fn.extend({
     mapSearch: function(options) {
-      var change_page, current_params, el, get_current_params, makeAjaxRequest, map, markers, next_page, pagination_status, previous_page, processPagination, processResults, set_view, settings, update,
+      var change_page, current_params, el, get_current_params, makeAjaxRequest, map, markers, pagination_status, processPagination, processResults, set_view, settings, update,
         _this = this;
       el = this;
       settings = {
@@ -44,7 +44,7 @@
         },
         pagination_el: $("#mapsearch-pagination"),
         pagination_template: function(pagination) {
-          return "          Current Page: " + pagination.page + "<br />          Total Pages: " + pagination.total_pages + "<br />          Count: " + pagination.count + "<br />          Per Page: " + pagination.per_page + "<br />          <a href='#' data-mapsearch-role='previous-page'>previous page</a><br />          <a href='#' data-mapsearch-role='next-page'>next page</a>        ";
+          return "          Current Page: " + pagination.page + "<br />          Total Pages: " + pagination.total_pages + "<br />          Count: " + pagination.count + "<br />          Per Page: " + pagination.per_page + "<br />          <a href='#' data-mapsearch-role='change-page' data-mapsearch-pagenumber='" + (pagination.page - 1) + "'>previous page</a><br />          <a href='#' data-mapsearch-role='change-page' data-mapsearch-pagenumber='" + (pagination.page + 1) + "'>next page</a>        ";
         },
         pagination_data: {
           page: function(data) {
@@ -122,11 +122,8 @@
       map.on('dragend zoomend', function() {
         return change_page(1);
       });
-      $(document).on("click", "[data-mapsearch-role=previous-page]", function() {
-        return previous_page();
-      });
-      $(document).on("click", "[data-mapsearch-role=next-page]", function() {
-        return next_page();
+      $(document).on("click", "[data-mapsearch-role=change-page]", function() {
+        return change_page($(this).data('mapsearch-pagenumber'));
       });
       set_view = arguments.callee.set_view = function(latlng, zoom, updateMap) {
         if (updateMap == null) {
@@ -147,12 +144,6 @@
         return makeAjaxRequest($.extend(current_params, {
           page: page
         }));
-      };
-      next_page = arguments.callee.next_page = function(page) {
-        return change_page(pagination_status.page + 1);
-      };
-      previous_page = arguments.callee.previous_page = function(page) {
-        return change_page(pagination_status.page - 1);
       };
       return get_current_params = arguments.callee.get_current_params = function() {
         return current_params;

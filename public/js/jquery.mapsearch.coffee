@@ -33,8 +33,8 @@ $.fn.extend
           Total Pages: #{pagination.total_pages}<br />
           Count: #{pagination.count}<br />
           Per Page: #{pagination.per_page}<br />
-          <a href='#' data-mapsearch-role='previous-page'>previous page</a><br />
-          <a href='#' data-mapsearch-role='next-page'>next page</a>
+          <a href='#' data-mapsearch-role='change-page' data-mapsearch-pagenumber='#{pagination.page - 1}'>previous page</a><br />
+          <a href='#' data-mapsearch-role='change-page' data-mapsearch-pagenumber='#{pagination.page + 1}'>next page</a>
         "
       pagination_data:
         page: (data) -> data.meta.page
@@ -108,8 +108,7 @@ $.fn.extend
     map.on 'dragend zoomend', () ->
       change_page(1); # also makes request
 
-    $(document).on "click", "[data-mapsearch-role=previous-page]", () -> previous_page();
-    $(document).on "click", "[data-mapsearch-role=next-page]", () -> next_page();
+    $(document).on "click", "[data-mapsearch-role=change-page]", () -> change_page($(this).data('mapsearch-pagenumber'));
 
     set_view = arguments.callee.set_view = (latlng, zoom, updateMap = true) ->
       map.setView(latlng, zoom)
@@ -121,12 +120,6 @@ $.fn.extend
     change_page = arguments.callee.change_page = (page) =>
       return if page > pagination_status.total_pages or page is 0
       makeAjaxRequest($.extend current_params, {page: page})
-
-    next_page = arguments.callee.next_page = (page) =>
-      change_page(pagination_status.page + 1)
-
-    previous_page = arguments.callee.previous_page = (page) =>
-      change_page(pagination_status.page - 1)
 
     get_current_params = arguments.callee.get_current_params = () =>
       current_params
