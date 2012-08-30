@@ -57,9 +57,19 @@ var bizSchema = new mongoose.Schema({
 bizSchema.index({'latlon':'2d'});
 
 bizSchema.pre('save', function (next) {
-  var biz = this;
+  var biz = this,
+    addressString = '',
+    addressProps = ['address', 'city', 'st', 'zip'];
 
-  if (biz.latlon.length === 0){
+  var hasChanged = false;
+  for (i=0; i<addressProps.length; i++) {
+    if (this._modified(addressProps[i]) === true) {
+      hasChanged = true;
+      break;
+    }
+  }
+
+  if (hasChanged || this.isNew){
     var full_address = this.address + ' ' + this.city + ', ' + this.state + ' ' + this.zip;
 
     cachedGeocodes = GeocodeCache.findOne({address: full_address}, function(err, result) {
@@ -69,23 +79,29 @@ bizSchema.pre('save', function (next) {
           if (res.ok) {
             var json = JSON.parse(res.text);
             var results = json[Object.keys(json)[0]];
-            if (results == null) {
+            var newCache;
+            if (results === null) {
               console.log("Couldn't geocode the following:");
               console.log(json);
-              next();
+              newCache = new GeocodeCache({address: full_address, latlon: null});
             } else {
               biz.latlon = [results['longitude'], results['latitude']];
-              var newCache = new GeocodeCache({address: full_address, latlon: biz.latlon});
-              newCache.save();
+              newCache = new GeocodeCache({address: full_address, latlon: biz.latlon});
               console.log('Geocoded! ' + results['longitude'] + ', ' + results['latitude']);
             }
+            newCache.save(function(err){
+              if (err) console.log("error saving new cache");
+              next();
+            });
           } else {
             console.log('Oh no! error!');
+            next();
           }
-          next();
         });
       } else {
-        biz.latlon = result.latlon;
+        if (biz.latlon !== null) {
+          biz.latlon = result.latlon;
+        }
         console.log('geocoded from cache');
         next();
       }
@@ -98,6 +114,24 @@ bizSchema.pre('save', function (next) {
   }
 
 });
+
+
+//h4ck from previous project that gives a nice shortcut
+mongoose.Schema.prototype.__proto__._modified = function(prop){
+  var modified;
+  if (typeof(prop) !== "undefined") {
+    modified = typeof(this._activePaths.states.modify[prop]) !== "undefined";
+  } else {
+    modified = [];
+    for(var p in this._activePaths.states.modify){
+      if (this._activePaths.states.modify[p] === true){
+        modified.push(p);
+      }
+    }
+  }
+
+  return modified;
+};
 
 exports.Biz = DB.model('Biz', bizSchema);
 exports.GeocodeCache = GeocodeCache = DB.model('GeocodeCache', geocodeCacheSchema);

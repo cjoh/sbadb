@@ -3,9 +3,8 @@ var mongoose = require('mongoose');
 global.DB = mongoose.createConnection('localhost', 'dsbs');
 var Biz = require('../../model').Biz;
 
-console.log(process.argv)
-
 if (process.argv.indexOf('--sample-data') !== -1) {
+  console.log("++++++++ USING SAMPLE DATA ++++++++");
   var proid_file = __dirname + '/../dump/PRO_ID_SAMPLE.TXT';
   var naics_file = __dirname + '/../dump/NAICS_SAMPLE.TXT';
 } else {
@@ -13,29 +12,54 @@ if (process.argv.indexOf('--sample-data') !== -1) {
   var naics_file = __dirname + '/../dump/NAICS.TXT';
 }
 
-Biz.collection.remove({});
+//not anymore!
+//Biz.collection.remove({});
 
 var convertToBoolean = function(props, json) {
   for (var i=0, len = props.length; i<len; i++) {
     if (typeof json[props[i]] == 'undefined') continue;
     if (json[props[i]].toUpperCase() == 'Y') {
-      json[props[i]] = true
+      json[props[i]] = true;
     } else {
-      json[props[i]] = false
+      json[props[i]] = false;
     }
   }
 };
 
 var parse = function() {
   importFromTxt(proid_file, function(doc, cb){
-    // save function
-    convertToBoolean(['gcc', 'edi', 'exportcd', 'women', 'veteran', 'dav', 'vietnam', 'rgstrtnccrind'], doc);
-    newBiz = new Biz(doc);
-    newBiz.save(function(err) {
-      if (err) console.log("Error saving newBiz: " + err);
-      return cb();
-    });
 
+    //check to see if Biz already exists
+    Biz.findOne({user_id: doc.user_id}, function(err, biz) {
+      if (err) {
+        console.log("ERR FINDING BIZ");
+        return cb();
+      } else {
+        convertToBoolean(['gcc', 'edi', 'exportcd', 'women', 'veteran', 'dav', 'vietnam', 'rgstrtnccrind'], doc);
+        if (biz === null) {
+          console.log("New Biz");
+          biz = new Biz(doc);
+        } else {
+          console.log("Existing Biz");
+          //most likely nothing has changed, but let's double-check
+          var hasChanged = false;
+          for (var prop in doc) {
+            if (biz[prop] !== doc[prop]) {
+              hasChanged = true;
+              biz[prop] = doc[prop];
+            }
+          }
+          if (hasChanged === false) {
+            return cb();
+          }
+        }
+
+        biz.save(function(err) {
+          if (err) console.log("Error saving newBiz: " + err);
+          return cb();
+        });
+      }
+    });
   }, function(){
 
     importFromTxt(naics_file, function(doc, cb){
@@ -90,7 +114,7 @@ var importFromTxt = function(filepath, saveFn, cb) {
         console.log(rows.length + ' rows remaining');
         parseLine(rows);
       });
-    }
+    };
 
     rows.shift();
     parseLine(rows);
