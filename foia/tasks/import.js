@@ -1,7 +1,7 @@
 var fs = require('fs')
 var mongoose = require('mongoose');
 global.DB = mongoose.createConnection('localhost', 'dsbs');
-var Biz = require('../model').Biz;
+var Biz = require('../../model').Biz;
 
 Biz.collection.remove({});
 

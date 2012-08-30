@@ -1,4 +1,4 @@
 exports.init = function(app){
-  app.get('/v1/bizs', require('./foia/controllers/v1').index);
-  //other routes go here
+  app.get('/v1/bizs', require('./controllers/v1').index);
+  app.get('/v1/bizs/:id', require('./controllers/v1').single);
 };
