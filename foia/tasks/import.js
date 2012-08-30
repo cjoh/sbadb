@@ -5,8 +5,8 @@ var Biz = require('../../model').Biz;
 
 if (process.argv.indexOf('--sample-data') !== -1) {
   console.log("++++++++ USING SAMPLE DATA ++++++++");
-  var proid_file = __dirname + '/../dump/PRO_ID_SAMPLE.TXT';
-  var naics_file = __dirname + '/../dump/NAICS_SAMPLE.TXT';
+  var proid_file = __dirname + '/../dump/PRO_ID_SAMPLE.txt';
+  var naics_file = __dirname + '/../dump/NAICS_SAMPLE.txt';
 } else {
   var proid_file = __dirname + '/../dump/PRO_ID.TXT';
   var naics_file = __dirname + '/../dump/NAICS.TXT';
