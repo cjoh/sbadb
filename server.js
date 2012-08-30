@@ -9,7 +9,7 @@ var express = require('express')
   , path = require('path')
   , mongoose = require('mongoose');
 
-global.DB = mongoose.createConnection('localhost', 'dsbs');
+global.DB = mongoose.createConnection(process.env.MONGOHQ_URL || 'localhost', 'dsbs');
 var app = express();
 
 app.configure(function(){
