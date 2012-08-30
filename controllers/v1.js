@@ -1,14 +1,13 @@
 var fs = require('fs');
 var Biz = require('../model').Biz;
-var mongooseApiQuery = require('mongoose-api-query');
-
 var booleanProps = ['gcc', 'edi', 'exportcd', 'women', 'veteran', 'dav', 'vietnam', 'rgstrtnccrind',
                     'naics.naicsprimind', 'naics.naicsgreenind', 'naics.naicssmllbusind', 'naics.naicsemrgsmllbusind'];
 
 exports.index = function(req, res) {
 
-  var pageOptions = {perPage: 10, page: req.query.page || 1};
-  var query = Biz.apiQuery(req.query, pageOptions).sort('name');
+  var page = parseInt(req.query.page, 10) || 1;
+  var perPage = 10;
+  var query = Biz.apiQuery(req.query).limit(perPage).skip((page-1)*perPage).sort('name');
   var response = {};
 
   if (req.query.ne_lat) {
@@ -20,11 +19,11 @@ exports.index = function(req, res) {
     if (err) res.send({err:err});
     else {
       response.results = results;
-      response.meta = pageOptions;
+      response.meta = {perPage: perPage, page: page};
 
       query.count(function(err, count){
         response.meta.count = count;
-        response.meta.totalPages = Math.ceil(count / pageOptions.perPage);
+        response.meta.totalPages = Math.ceil(count / perPage);
         res.send(response);
       });
     }

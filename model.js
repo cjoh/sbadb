@@ -56,6 +56,8 @@ var bizSchema = new mongoose.Schema({
 
 bizSchema.index({'latlon':'2d'});
 
+bizSchema.plugin(require('mongoose-api-query'));
+
 bizSchema.pre('save', function (next) {
   var biz = this,
     addressString = '',
