@@ -11,6 +11,6 @@
     "stylus": "*",
     "mongoose": "~3.0.2",
     "superagent": "*",
-    "mongoose-api-query": "0.0.1"
+    "mongoose-api-query": "0.0.2"
   }
 }
