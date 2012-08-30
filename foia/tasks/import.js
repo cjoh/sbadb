@@ -3,6 +3,16 @@ var mongoose = require('mongoose');
 global.DB = mongoose.createConnection('localhost', 'dsbs');
 var Biz = require('../model').Biz;
 
+console.log(process.argv)
+
+if (process.argv.indexOf('--sample-data') !== -1) {
+  var proid_file = __dirname + '/../dump/PRO_ID_SAMPLE.TXT';
+  var naics_file = __dirname + '/../dump/NAICS_SAMPLE.TXT';
+} else {
+  var proid_file = __dirname + '/../dump/PRO_ID.TXT';
+  var naics_file = __dirname + '/../dump/NAICS.TXT';
+}
+
 Biz.collection.remove({});
 
 var convertToBoolean = function(props, json) {
@@ -17,7 +27,7 @@ var convertToBoolean = function(props, json) {
 };
 
 var parse = function() {
-  importFromTxt(__dirname + '/../dump/PRO_ID.TXT', function(doc, cb){
+  importFromTxt(proid_file, function(doc, cb){
     // save function
     convertToBoolean(['gcc', 'edi', 'exportcd', 'women', 'veteran', 'dav', 'vietnam', 'rgstrtnccrind'], doc);
     newBiz = new Biz(doc);
@@ -28,7 +38,7 @@ var parse = function() {
 
   }, function(){
 
-    importFromTxt(__dirname + '/../dump/NAICS.TXT', function(doc, cb){
+    importFromTxt(naics_file, function(doc, cb){
 
       convertToBoolean(['naicsprimind', 'naicsgreenind', 'naicssmllbusind', 'naicsemrgsmllbusind'], doc);
 
