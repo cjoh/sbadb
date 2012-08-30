@@ -1,7 +1,13 @@
 var fs = require('fs')
 var mongoose = require('mongoose');
-global.DB = mongoose.createConnection('localhost', 'dsbs');
-var Biz = require('../../model').Biz;
+
+if (process.env.MONGOHQ_URL) {
+  global.DB = mongoose.createConnection(process.env.MONGOHQ_URL)
+} else {
+  global.DB = mongoose.createConnection('localhost', 'dsbs');
+}
+
+var Biz = require('../model').Biz;
 
 if (process.argv.indexOf('--sample-data') !== -1) {
   console.log("++++++++ USING SAMPLE DATA ++++++++");
