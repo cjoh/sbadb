@@ -26,19 +26,45 @@ exports.index = function(req, res) {
   }, function(query, attributes){
 
     query.sort('name').exec(function (err, results) {
+      console.log(this);
       if (err) return console.log(err);
-
       var response = {};
       response.results = results;
       response.meta = {page: attributes.page, per_page: attributes.per_page }
 
-      Biz.count(attributes.searchParams, function(err, count){
+      query.count(attributes.searchParams, function(err, count){
         response.meta.count = count;
         response.meta.total_pages = Math.ceil(count / attributes.per_page);
         res.send(response);
       });
 
     });
+  });
+};
+
+exports.zindex = function(req, res) {
+
+  var pageOptions = {perPage: 10, page: req.query.page || 1};
+  var query = Biz.apiQuery(req.query, pageOptions).sort('name');
+  var response = {};
+
+  if (req.query.ne_lat) {
+    var box = [[parseFloat(req.query['sw_lng']), parseFloat(req.query['sw_lat'])], [parseFloat(req.query['ne_lng']),  parseFloat(req.query['ne_lat'])]];
+    query.within.box(box);
+  }
+
+  query.exec(function (err, results) {
+    if (err) res.send({err:err});
+    else {
+      response.results = results;
+      response.meta = pageOptions;
+
+      this.count(function(err, count){
+        response.meta.count = count;
+        response.meta.totalPages = Math.ceil(count / pageOptions.perPage);
+        res.send(response);
+      });
+    }
   });
 };
 
