@@ -1,6 +1,10 @@
 {
   "name": "dsbsapi",
   "version": "0.0.1",
+  "engines": {
+    "node": ">= 0.5.0",
+    "npm":  "1.1.x"
+  },
   "private": true,
   "scripts": {
     "start": "node server"
@@ -11,6 +15,6 @@
     "stylus": "*",
     "mongoose": "~3.0.2",
     "superagent": "*",
-    "mongoose-api-query": "0.0.1"
+    "mongoose-api-query": "0.0.2"
   }
 }
