@@ -7,7 +7,7 @@ var geocodeCacheSchema = new mongoose.Schema({
 });
 
 var bizSchema = new mongoose.Schema({
-  user_id: String,
+  user_id: {type: String, index: true},
   name: String,
   address: String,
   address1: String,

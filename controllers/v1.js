@@ -37,5 +37,13 @@ exports.index = function(req, res) {
 
     });
   });
+};
 
+exports.show = function(req, res) {
+  Biz.findOne({user_id: req.params.user_id}, function(err, biz) {
+    if (err) res.send({err: err});
+    else {
+      res.send(biz);
+    }
+  });
 };
