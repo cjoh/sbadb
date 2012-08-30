@@ -36,6 +36,17 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
+// function configHeaders(res, req, next) {
+//   console.log("configHeaders…");
+//   res.header('Access-Control-Allow-Origin', '*');
+//   res.header('Access-Control-Allow-Credentials', true);
+//   res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
+//   res.header('Access-Control-Allow-Headers', 'Content-Type');
+//   next();
+// }
+
+//app.use(configHeaders);
+
 routes.init(app);
 
 http.createServer(app).listen(app.get('port'), function(){

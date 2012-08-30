@@ -7,43 +7,6 @@ var booleanProps = ['gcc', 'edi', 'exportcd', 'women', 'veteran', 'dav', 'vietna
 
 exports.index = function(req, res) {
 
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-
-  mongooseApiQuery(req.query, {
-    custom_params: function(key, val, searchParams) {
-      if (key === "ne_lat") {
-        var box = [[parseFloat(req.query['sw_lng']), parseFloat(req.query['sw_lat'])], [parseFloat(req.query['ne_lng']),  parseFloat(req.query['ne_lat'])]];
-        console.log(box)
-        searchParams["latlon"] = {$within: {$box: box}};
-        return true;
-      }
-    },
-    model: Biz,
-    per_page: 10
-  }, function(query, attributes){
-
-    query.sort('name').exec(function (err, results) {
-      console.log(this);
-      if (err) return console.log(err);
-      var response = {};
-      response.results = results;
-      response.meta = {page: attributes.page, per_page: attributes.per_page }
-
-      query.count(attributes.searchParams, function(err, count){
-        response.meta.count = count;
-        response.meta.total_pages = Math.ceil(count / attributes.per_page);
-        res.send(response);
-      });
-
-    });
-  });
-};
-
-exports.zindex = function(req, res) {
-
   var pageOptions = {perPage: 10, page: req.query.page || 1};
   var query = Biz.apiQuery(req.query, pageOptions).sort('name');
   var response = {};
@@ -59,7 +22,7 @@ exports.zindex = function(req, res) {
       response.results = results;
       response.meta = pageOptions;
 
-      this.count(function(err, count){
+      query.count(function(err, count){
         response.meta.count = count;
         response.meta.totalPages = Math.ceil(count / pageOptions.perPage);
         res.send(response);
@@ -69,7 +32,8 @@ exports.zindex = function(req, res) {
 };
 
 exports.show = function(req, res) {
-  Biz.findOne({user_id: req.params.user_id}, function(err, biz) {
+
+  var q = Biz.findOne({user_id: req.params.user_id}, function(err, biz) {
     if (err) res.send({err: err});
     else {
       res.send(biz);
